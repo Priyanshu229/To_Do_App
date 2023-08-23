@@ -1,6 +1,8 @@
 package com.example.todo;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -9,15 +11,32 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.todo.Adapter.ToDOAdapter;
+import com.example.todo.Model.ToDoModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     Button logoutBtn;
     FirebaseAuth mAuth;
     FirebaseUser User;
+
+    private FirebaseFirestore firestore;
+    private ToDOAdapter adapter;
+    private List<ToDoModel> mList;
 
 
 
@@ -30,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
         User = mAuth.getCurrentUser();
+        firestore = FirebaseFirestore.getInstance();
 
 
         if(User == null){
@@ -61,6 +81,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mList = new ArrayList<>();
+        adapter = new ToDOAdapter(MainActivity.this, mList);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(new TouchHelper(adapter));
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        recyclerView.setAdapter(adapter);
+        showData();
+
+
+
 
 
 
@@ -74,5 +104,25 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void showData(){
+        firestore.collection("task").orderBy("time", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+            @Override
+            public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                for(DocumentChange documentChange : value.getDocumentChanges()){
+                    if(documentChange.getType()== DocumentChange.Type.ADDED){
+                        String id=documentChange.getDocument().getId();
+                        ToDoModel toDoModel = documentChange.getDocument().toObject(ToDoModel.class).withId(id);
+
+                        mList.add(toDoModel);
+                        adapter.notifyDataSetChanged();
+
+                    }
+                }
+
+            }
+        });
+
     }
 }

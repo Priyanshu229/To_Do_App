@@ -22,6 +22,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class newTask extends BottomSheetDialogFragment {
 
     EditText addTask;
     Button saveBtn;
+    private String id = "";
 
     private FirebaseFirestore firestore;
     private Context context;
@@ -55,8 +57,23 @@ public class newTask extends BottomSheetDialogFragment {
 
         firestore = FirebaseFirestore.getInstance();
         context = getContext();
+        boolean isUpdate = false;
+        final Bundle bundle = getArguments();
+        if(bundle!= null){
+            isUpdate = true;
+            String task = bundle.getString("task");
+            id = bundle.getString("id");
+            addTask.setText(task);
+
+            if(task.length()>0){
+                saveBtn.setEnabled(false);
+                saveBtn.setBackgroundColor(Color.GRAY);
+            }
+
+        }
 
 
+        boolean finalIsUpdate = isUpdate;
         addTask.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -79,35 +96,43 @@ public class newTask extends BottomSheetDialogFragment {
 
                         String task;
                         task = addTask.getText().toString();
+                        if(finalIsUpdate){
+                            firestore.collection("task").document(id).update("task", task );
+                            Toast.makeText(context, "Task Updated", Toast.LENGTH_SHORT).show();
 
-                        if(task.isEmpty()){
-                            Toast.makeText(context, "Please enter the task", Toast.LENGTH_SHORT).show();
+                        }else {
 
-                        }else{
-                            Map<String, Object> taskMap = new HashMap<>();
-                            taskMap.put("task", task);
-                            taskMap.put("status", 0);
 
-                            firestore.collection("task").add(taskMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                                @Override
-                                public void onComplete(@NonNull Task<DocumentReference> task) {
+                            if (task.isEmpty()) {
+                                Toast.makeText(context, "Please enter the task", Toast.LENGTH_SHORT).show();
 
-                                    if(task.isSuccessful()){
-                                        Toast.makeText(context, "Task Saved", Toast.LENGTH_SHORT).show();
-                                    }else{
-                                        Toast.makeText(context, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Map<String, Object> taskMap = new HashMap<>();
+                                taskMap.put("task", task);
+                                taskMap.put("status", 0);
+                                taskMap.put("time", FieldValue.serverTimestamp());
+
+                                firestore.collection("task").add(taskMap).addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<DocumentReference> task) {
+
+                                        if (task.isSuccessful()) {
+                                            Toast.makeText(context, "Task Saved", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(context, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                        }
+
                                     }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
 
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(context, e.getMessage(), Toast.LENGTH_SHORT).show();
-
-                                }
-                            });
+                                    }
+                                });
 
 
+                            }
                         }
                         dismiss();
 

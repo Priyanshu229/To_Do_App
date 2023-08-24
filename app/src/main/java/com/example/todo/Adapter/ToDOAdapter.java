@@ -99,9 +99,6 @@ public class ToDOAdapter extends RecyclerView.Adapter<ToDOAdapter.MyViewHolder> 
         newTask newTask = new newTask();
         newTask.setArguments(bundle);
         newTask.show(activity.getSupportFragmentManager(), newTask.getTag());
-        firestore.collection("task").document(toDoModel.TaskId).delete();
-        todolist.remove(position);
-        notifyItemRemoved(position);
 
     }
 

@@ -27,6 +27,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/RViewCheckBox"
                 android:layout_gravity="fill"
+                android:textSize="16sp"
                 android:paddingStart="10dp"
                 android:text="this is the first task" />
 

@@ -19,7 +19,7 @@ public class TouchHelper extends ItemTouchHelper.SimpleCallback {
 
     public TouchHelper(ToDOAdapter toDOAdapter) {
         super(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
-        this.adapter = adapter;
+        this.adapter = toDOAdapter;
     }
 
     @Override
@@ -45,6 +45,10 @@ public class TouchHelper extends ItemTouchHelper.SimpleCallback {
 
                 }
             });
+
+            builder.show();
+        }else if(direction == ItemTouchHelper.LEFT){
+            adapter.editTask(position);
         }
 
 

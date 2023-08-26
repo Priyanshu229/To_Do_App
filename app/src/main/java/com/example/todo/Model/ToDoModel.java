@@ -1,7 +1,7 @@
 package com.example.todo.Model;
 
 public class ToDoModel extends  TaskId{
-    private String task;
+    private String task, due;
     private int status;
 
 
@@ -9,7 +9,13 @@ public class ToDoModel extends  TaskId{
         return task;
     }
 
+    public String getDue() {
+        return due;
+    }
+
     public int getStatus() {
         return status;
     }
+
+
 }

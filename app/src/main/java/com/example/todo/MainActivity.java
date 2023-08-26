@@ -24,8 +24,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -34,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser User;
 
-    private FirebaseFirestore firestore;
+    private FirebaseFirestore fireStore;
     private ToDOAdapter adapter;
     private List<ToDoModel> mList;
 
@@ -49,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mAuth = FirebaseAuth.getInstance();
         User = mAuth.getCurrentUser();
-        firestore = FirebaseFirestore.getInstance();
+        fireStore = FirebaseFirestore.getInstance();
 
 
         if(User == null){
@@ -107,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showData(){
-        firestore.collection("task").orderBy("time", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
+        fireStore.collection("task").orderBy("time", Query.Direction.ASCENDING).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
                 for(DocumentChange documentChange : value.getDocumentChanges()){
